@@ -1,0 +1,44 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "totvs_language_debug",
+			"request": "launch",
+			"name": "TOTVS Language Debug",
+			"program": "${command:AskForProgramName}",
+			"cwb": "${workspaceFolder}",
+			"smartclientBin": "C:\\TOTVS12\\Protheus\\Protheus\\bin\\smartclient\\smartclient.exe",
+			"isMultiSession": true,
+			"enableTableSync": true,
+			"enableMultiThread": true
+		}
+	],
+	"lastPrograms": [
+		{
+			"args": [],
+			"label": "u_start_debug"
+		},
+		{
+			"label": "SIGAMDI"
+		},
+		{
+			"label": "APSDU"
+		},
+		{
+			"label": "sigacfg"
+		},
+		{
+			"label": "u_xxx"
+		},
+		{
+			"label": "SIGAFAT"
+		},
+		{
+			"label": "sigaGPE"
+		},
+		{
+			"label": "sigacom"
+		}
+	],
+	"lastProgramExecuted": "u_xxx"
+}

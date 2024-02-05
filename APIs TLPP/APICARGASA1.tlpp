@@ -1,0 +1,246 @@
+#INCLUDE "tlpp-core.th"
+#INCLUDE "tlpp-rest.th"
+#INCLUDE "TOTVS.CH"
+#INCLUDE "PROTHEUS.CH"
+#INCLUDE "RESTFUL.CH"
+#INCLUDE "TOPCONN.CH"
+#INCLUDE "TBICONN.CH"
+
+
+@POST(endpoint="/cargasa1/importa", description="API Carga SA1")
+
+User Function ImportaSA1()
+
+Local lRet:=.f.
+Local aArea:=GetArea()
+Local oContent:=self:getcontent()
+Local oParsedContent:=JsonObject():New()
+Local oResponse:=JsonObject():New()
+Local cError := ""
+Local nx := 0
+private lAutoErrNoFile:= .T. 
+Private lMsErroAuto := .F.
+
+cError := oParsedContent:fromjson(oContent)
+
+If !Empty(cError)
+
+    //--------------------------
+    // Retorna o erro do parse.
+    //--------------------------
+    SetRestFault(400, ENCODEUTF8(cError))
+
+    return .f.
+else
+    
+    //-----------------------------------------------
+    // Prepara o ambiente para execução do ExecAuto.
+    //-----------------------------------------------
+
+        for nx:=1 to len(oParsedContent['SA1'])
+
+            RECLOCK("SA1",.F.)
+
+                SA1->A1_FILIAL := xFilial("SA1")
+                SA1->A1_COD := SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_COD']),1,TamSX3("A1_COD")[1])
+                SA1->A1_LOJA :=  SUBSTRING(Alltrim(UPPER(oParsedContent['SA1'][nX]['A1_LOJA'])),1,TamSX3("A1_LOJA")[1])
+                SA1->A1_NOME :=     SUBSTRING(Alltrim(UPPER(oParsedContent['SA1'][nX]['A1_NOME'])),1,TamSX3("A1_NOME")[1])   
+                SA1->A1_NREDUZ :=    SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_NREDUZ']),1,TamSX3("A1_NREDUZ")[1])
+
+                If !empty(oParsedContent['SA1'][nX]['A1_END'])
+                    SA1->A1_END:=SUBSTRING(Alltrim(UPPER(oParsedContent['SA1'][nX]['A1_END'])),1,TamSX3("A1_END")[1])  
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_BAIRRO'])
+                    SA1->A1_BAIRRO:=SUBSTRING(Alltrim(UPPER(oParsedContent['SA1'][nX]['A1_BAIRRO'])),1,TamSX3("A1_BAIRRO")[1])      
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_PESSOA'])
+                    SA1->A1_PESSOA:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_PESSOA']),1,TamSX3("A1_PESSOA")[1])      
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_TIPO'])
+                    SA1->A1_TIPO:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_TIPO']),1,TamSX3("A1_TIPO")[1])    
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_EST'])
+                    SA1->A1_EST:= SUBSTRING(Alltrim(UPPER(oParsedContent['SA1'][nX]['A1_EST'])),1,TamSX3("A1_EST")[1])
+                Endif
+
+
+                /*If !empty(oParsedContent['SA1'][nX]['A1_COD_MUN'])
+                    SA1->A1_COD_MUN:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_COD_MUN']),1,TamSX3("A1_COD_MUN")[1])  
+                Endif*/
+
+                If !empty(oParsedContent['SA1'][nX]['A1_CEP'])
+                    SA1->A1_CEP:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_CEP']),1,TamSX3("A1_CEP")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_MUN'])
+                    SA1->A1_MUN:=SUBSTRING(Alltrim(UPPER(oParsedContent['SA1'][nX]['A1_MUN'])),1,TamSX3("A1_MUN")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_PAIS'])
+                    SA1->A1_PAIS:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_PAIS']),1,TamSX3("A1_PAIS")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_CODPAIS'])
+                    SA1->A1_CODPAIS:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_CODPAIS']),1,TamSX3("A1_CODPAIS")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_CGC'])
+                    SA1->A1_CGC:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_CGC']),1,TamSX3("A1_CGC")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_INSCR'])
+                    SA1->A1_INSCR:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_INSCR']),1,TamSX3("A1_INSCR")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_INSCRM'])
+                    SA1->A1_INSCRM:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_INSCRM']),1,TamSX3("A1_INSCRM")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_CONTATO'])
+                    SA1->A1_CONTATO:=SUBSTRING(Alltrim(UPPER(oParsedContent['SA1'][nX]['A1_CONTATO'])),1,TamSX3("A1_CONTATO")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_DDD'])
+                    SA1->A1_DDD:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_DDD']),1,TamSX3("A1_DDD")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_TEL'])
+                    SA1->A1_TEL:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_TEL']),2,TamSX3("A1_TEL")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_EMAIL'])
+                    SA1->A1_EMAIL:=SUBSTRING(Alltrim(UPPER(oParsedContent['SA1'][nX]['A1_EMAIL'])),1,TamSX3("A1_EMAIL")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_COMPLEM'])
+                    SA1->A1_COMPLEM:=SUBSTRING(Alltrim(UPPER(oParsedContent['SA1'][nX]['A1_COMPLEM'])),1,TamSX3("A1_COMPLEM")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_ENDCOB'])
+                    SA1->A1_ENDCOB:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_ENDCOB']),1,TamSX3("A1_ENDCOB")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_BAIRROC'])
+                    SA1->A1_BAIRROC:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_BAIRROC']),1,TamSX3("A1_BAIRROC")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_CEPC'])
+                    SA1->A1_CEPC:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_CEPC']),1,TamSX3("A1_CEPC")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_MUNC'])
+                    SA1->A1_MUNC:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_MUNC']),1,TamSX3("A1_MUNC")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_TRANSP'])
+                    SA1->A1_TRANSP:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_TRANSP']),1,TamSX3("A1_TRANSP")[1]) 
+                Endif
+
+                /*If !empty(oParsedContent['SA1'][nX]['A1_GRPVEN'])
+                    SA1->A1_GRPVEN:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_GRPVEN']),1,TamSX3("A1_GRPVEN")[1]) 
+                Endif*/
+            
+                If !empty(oParsedContent['SA1'][nX]['A1_TPESSOA'])
+                    SA1->A1_TPESSOA:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_TPESSOA']),1,TamSX3("A1_TPESSOA")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_RECISS'])
+                    SA1->A1_RECISS:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_RECISS']),1,TamSX3("A1_RECISS")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_RECINSS'])
+                    SA1->A1_RECINSS:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_RECINSS']),1,TamSX3("A1_RECINSS")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_RECCOFI'])
+                    SA1->A1_RECCOFI:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_RECCOFI']),1,TamSX3("A1_RECCOFI")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_RECCSLL'])
+                    SA1->A1_RECCSLL:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_RECCSLL']),1,TamSX3("A1_RECCSLL")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_RECPIS'])
+                    SA1->A1_RECPIS:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_RECPIS']),1,TamSX3("A1_RECPIS")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_CONTRIB'])
+                    SA1->A1_CONTRIB:=IIF(oParsedContent['SA1'][nX]['A1_CONTRIB']$"N","2","1") 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_RECIRRF'])
+                    SA1->A1_RECIRRF:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_RECIRRF']),1,TamSX3("A1_RECIRRF")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_LC'])
+                    SA1->A1_LC:=VAL(oParsedContent['SA1'][nX]['A1_LC']) 
+                Endif
+
+                /*If !empty(oParsedContent['SA1'][nX]['A1_GRPTRIB'])
+                    SA1->A1_GRPTRIB:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_GRPTRIB']),1,TamSX3("A1_GRPTRIB")[1]) 
+                Endif
+
+                If !empty(oParsedContent['SA1'][nX]['A1_CONTA'])
+                    SA1->A1_CONTA:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_CONTA']),1,TamSX3("A1_CONTA")[1]) 
+                Endif*/
+
+                If !empty(oParsedContent['SA1'][nX]['A1_ZZCTAAD'])
+                    SA1->A1_ZZCTAAD:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_ZZCTAAD']),1,TamSX3("A1_ZZCTAAD")[1]) 
+                Endif
+
+            
+                
+
+                    If !empty(oParsedContent['SA1'][nX]['A1_GRPTRIB'])
+                        SA1->A1_GRPTRIB:= SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_GRPTRIB']),1,TamSX3("A1_GRPTRIB")[1])
+                    Endif
+
+                    If !empty(oParsedContent['SA1'][nX]['A1_CONTA'])
+                        SA1->A1_CONTA:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_CONTA']),1,TamSX3("A1_CONTA")[1]) 
+                    Endif
+
+                    If !empty(oParsedContent['SA1'][nX]['A1_ZZCTAAD'])
+                        SA1->A1_ZZCTAAD:=SUBSTRING(Alltrim(oParsedContent['SA1'][nX]['A1_ZZCTAAD']),1,TamSX3("A1_ZZCTAAD")[1])
+                    Endif
+
+                    If !empty(oParsedContent['SA1'][nX]['A1_COD_MUN'])
+                        SA1->A1_COD_MUN:=Alltrim(oParsedContent['SA1'][nX]['A1_COD_MUN'])  
+                    Endif
+
+                    If !empty(oParsedContent['SA1'][nX]['A1_GRPVEN'])
+                        SA1->A1_GRPVEN:= Alltrim(oParsedContent['SA1'][nX]['A1_GRPVEN']) 
+                    Endif
+
+                    
+                MSUNLOCK()
+
+                    
+
+                //----------------------------------------------------------------------
+                //Sucesso do ExecAuto e retorna os dados do cliente cadastrado em Json.
+                //----------------------------------------------------------------------        
+                oResponse['message']:="Cliente cadastrado com sucesso!"
+
+
+                Conout('Cliente Incluido!')
+
+                self:SetContentType('application/json')
+                self:SetResponse( EncodeUtf8(oResponse:toJson()) )
+        
+        NEXT
+
+
+
+        //--------------------------------------------------------------------------------------------
+        //Retorno codigo e mensagem de erro, caso não consiga preparar o ambiente com o RPCSetEnv().
+        //--------------------------------------------------------------------------------------------            SetRestFault(400, ENCODEUTF8("Não foi possivel preparar o ambiente. Solicite suporte Protheus."))
+endif
+
+
+    RestArea(aArea)
+
+Return lRet
