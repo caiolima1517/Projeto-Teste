@@ -30,7 +30,7 @@ Local oResponse:=JsonObject():New()
 Local cError := ""
 Local nx := 0
 
-cError := oParsedContent:fromjson(oContent)
+cError := oParsedContent:fromjson(FWNoAccent(DecodeUTF8(oContent)))
 
 If !Empty(cError)
 
