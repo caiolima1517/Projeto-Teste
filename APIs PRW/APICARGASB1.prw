@@ -55,7 +55,7 @@ else
         desc := Substring(oParsedContent['SB1'][nX]['B1_DESC'],1,nTamDesc)
         oSB1Mod := oModel:GetModel("SB1MASTER")
         //oSB1Mod:SetValue("B1_COD"    , oParsedContent['SB1'][nx]['B1_COD']      ) 
-        oSB1Mod:SetValue("B1_DESC"   , Upper(NoAcento(desc))      )      
+        oSB1Mod:SetValue("B1_DESC"   , RTrim(LTrim(Upper(NoAcento(desc))      )))      
         oSB1Mod:SetValue("B1_TIPO"   , oParsedContent['SB1'][nx]['B1_TIPO']      )
         oSB1Mod:SetValue("B1_GRUPO"   , oParsedContent['SB1'][nx]['B1_GRUPO']      )      
         oSB1Mod:SetValue("B1_UM"     , oParsedContent['SB1'][nx]['B1_UM']      )        
@@ -123,18 +123,31 @@ else
 
         /*IF !EMPTY(oParsedContent['SB1'][nx]['B1_X_CDSNR'])
             oSB1Mod:SetValue("B1_X_CDSNR" , oParsedContent['SB1'][nx]['B1_X_CDSNR']      )
-        ENDIF
+        ENDIF*/
 
 
         IF !EMPTY(oParsedContent['SB1'][nx]['B1_X_PARTN'])
             oSB1Mod:SetValue("B1_X_PARTN" , oParsedContent['SB1'][nx]['B1_X_PARTN']      )
-        ENDIF*/
+        ENDIF*
 
         oSB1Mod:SetValue("B1_IMPORT" , oParsedContent['SB1'][nx]['B1_IMPORT']      )
 
-        cCod:= ZB1COD(substr(oParsedContent['SB1'][nx]['B1_GRUPO'],3,2) )
+        //cCod:= ZB1COD(substr(oParsedContent['SB1'][nx]['B1_GRUPO'],3,2) )
 
-        oSB1Mod:SetValue("B1_COD", cCod)
+        oSB1Mod:SetValue("B1_COD", oParsedContent['SB1'][nx]['B1_COD'])
+
+
+        oSB5Mod := oModel:GetModel("SB5DETAIL")
+        If oSB5Mod != Nil
+
+            nTamDescB5:=TamSX3('B5_CEME')[1]
+
+            cDescSB5 := Substring(oParsedContent['SB1'][nX]['B5_CEME'],1,nTamDescB5)
+
+            oSB5Mod:SetValue("B5_CEME", RTrim(LTrim(UPPER(cDescSB5))))
+
+        EndIf
+   
 
         //Se conseguir validar as informações
         If oModel:VldData()
@@ -171,6 +184,11 @@ else
 
             //Mostra mensagem de erro
             lRet := .F.
+
+            oResponse['400']:=cMessage
+            
+            self:SetResponse(EncodeUtf8(oResponse:toJson()))
+
             ConOut("Erro: " + cMessage)
         Else
             lRet := .T.
@@ -249,16 +267,17 @@ Local cQuery := ""
         SQLCOD->(DbCloseArea())
     EndIf
 
-    cQuery := " SELECT Substring(MAX(B1_COD),3,8)+1 AS B1_COD "+CRLF
+    cQuery := " SELECT Substring(MAX(B1_COD),3,8)+2 AS B1_COD "+CRLF
     cQuery += " FROM "+ RETSQLNAME("SB1") +" WHERE "+CRLF
     cQuery += " B1_FILIAL='"+ xFilial("SB1") +"' AND "+CRLF
-    cQuery += " B1_COD LIKE '"+cGrupo+"%'  "+CRLF
+    cQuery += " B1_COD LIKE '"+cGrupo+"0%'  "+CRLF
 
     TCQUERY cQuery New Alias "SQLCOD"
 
     If !SQLCOD->(EOF())
         If SQLCOD->B1_COD > 0
-            cCod := cGrupo+strzero(SQLCOD->B1_COD,6)
+            cProxNum = cValtochar(SQLCOD->B1_COD)
+            cCod := cGrupo+strzero(Val(__SOMA1(cProxNum)),6)
         else
             cCod := cGrupo+"000001"
         ENDIF
